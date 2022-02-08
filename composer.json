@@ -6,7 +6,13 @@
   "authors": [
     {
       "name": "PayU",
-      "homepage": "http://developers.payu.com/"
+      "homepage": "https://developers.payu.com/"
     }
-  ]
+  ],
+  "support": {
+    "docs": "https://developers.payu.com/",
+    "issues": "https://github.com/PayU-EMEA/plugin_prestashop/issues",
+    "source": "https://github.com/PayU-EMEA/plugin_prestashop"
+  },
+  "type": "prestashop-module"
 }

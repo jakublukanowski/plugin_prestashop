@@ -1,3 +1,16 @@
+## 3.1.14
+ * Apply new credit mini widget with automatic configuration based on posId
+
+## 3.1.13
+ * Return to Prestashop standard order-confirmation page
+
+## 3.1.12
+ * BLIK as separate payment method
+ * Logotypes update
+ * Fix #281 logger is active when debug mode is enabled
+ * Fix 500 for refund notification
+ * Fix select pay method
+
 ## 3.1.11
  * Fix sending selected credit payment methods in order
 

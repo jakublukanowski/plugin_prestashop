@@ -14,6 +14,7 @@ Uwaga: plugin w [wersji 2.x](https://github.com/PayU/plugin_prestashop/tree/2.x)
 * [Instalacja](#instalacja)
 * [Aktualizacja](#aktualizacja)
 * [Konfiguracja](#konfiguracja)
+* [Logowanie](#logowanie)
 * [Więcej o cechach](#więcej-o-cechach)
     * [Wielowalutowość](#wielowalutowość)
     * [Wyświetlenie metod płatności](#wyświetlenie-metod-płatności)
@@ -87,6 +88,12 @@ Do prawidłowego funkcjonowania modułu wymagane są następujące rozszerzenia 
 1. Przejdź do `Moduły` » `Moduły i usługi`
 1. Wyszukaj `PayU` i naciśnij `Konfiguruj`
 
+## Logowanie
+
+Gdy sklep Prestashop przełączymy w tryb debugowania plugin zapisuje informacje do logów. Pliki logów znajdą się w katalogu:
+* Prestashop 1.7 - `/var/logs`
+* Prestashop 1.6 - `/log`
+
 ### Sposób integracji
 
 | Parameter | Opis |
@@ -129,6 +136,7 @@ W celu ustalenia kolejności wyświetlanych ikon metod płatności należy poda�
 
 ### Wielowalutowość
 POS w systemie PayU ma jedną walutę. Jeżeli chcemy akceptować płatność w sklepie PrestaShop w wielu walutach niezbędne jest dodanie konfiguracji POSa dla każdej waluty z osobna.   
+Błąd ERROR_INCONSISTENT_CURRENCIES oznacza nieobsługiwaną walutę przez POS. Kontakt z obsługą PayU jest wymagany przy zatwierdzeniu możliwości przyjmowania płatności w innej walucie dla trybu sandbox jak i osobnej umowy dla trybu produkcyjnego. 
 
 ### Wyświetlenie metod płatności
 Przy ustawionej opcji **Wyświetlaj metody płatności na stronie podsumowania zamówienia w PrestaShop** na `Tak` po wybraniu płatności przez PayU wyświetli się strona z ikonami banków bezpośrednio w sklepie PrestaShop.
