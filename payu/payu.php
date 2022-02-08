@@ -44,7 +44,7 @@ class PayU extends PaymentModule
         $this->name = 'payu';
         $this->displayName = 'PayU';
         $this->tab = 'payments_gateways';
-        $this->version = '3.1.11';
+        $this->version = '3.1.14';
         $this->author = 'PayU';
         $this->need_instance = 1;
         $this->bootstrap = true;
@@ -60,7 +60,6 @@ class PayU extends PaymentModule
         $this->description = $this->l('Accepts payments by PayU');
 
         $this->confirm_uninstall = $this->l('Are you sure you want to uninstall? You will lose all your settings!');
-
     }
 
     /**
@@ -100,7 +99,9 @@ class PayU extends PaymentModule
             Configuration::updateValue('PAYU_PROMOTE_CREDIT_CART', 1) &&
             Configuration::updateValue('PAYU_PROMOTE_CREDIT_SUMMARY', 1) &&
             Configuration::updateValue('PAYU_PROMOTE_CREDIT_PRODUCT', 1) &&
-            Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_TWISTO', 0) &&
+            Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_TWISTO_PL', 0) &&
+            Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_TWISTO_CZ', 0) &&
+            Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_PAYPO', 0) &&
             Configuration::updateValue('PAYU_SEPARATE_BLIK_PAYMENT', 0) &&
             Configuration::updateValue('PAYU_STATUS_CONTROL', 0)
         );
@@ -134,7 +135,9 @@ class PayU extends PaymentModule
             !Configuration::deleteByName('PAYU_PROMOTE_CREDIT_CART') ||
             !Configuration::deleteByName('PAYU_PROMOTE_CREDIT_SUMMARY') ||
             !Configuration::deleteByName('PAYU_PROMOTE_CREDIT_PRODUCT') ||
-            !Configuration::deleteByName('PAYU_SEPARATE_PAY_LATER_TWISTO') ||
+            !Configuration::deleteByName('PAYU_SEPARATE_PAY_LATER_TWISTO_PL') ||
+            !Configuration::deleteByName('PAYU_SEPARATE_PAY_LATER_TWISTO_CZ') ||
+            !Configuration::deleteByName('PAYU_SEPARATE_PAY_LATER_PAYPO') ||
             !Configuration::deleteByName('PAYU_SEPARATE_BLIK_PAYMENT') ||
             !Configuration::deleteByName('PAYU_STATUS_CONTROL')
         ) {
@@ -205,7 +208,9 @@ class PayU extends PaymentModule
                 !Configuration::updateValue('PAYU_PROMOTE_CREDIT_CART', (Tools::getValue('PAYU_PROMOTE_CREDIT_CART') ? 1 : 0)) ||
                 !Configuration::updateValue('PAYU_PROMOTE_CREDIT_SUMMARY', (Tools::getValue('PAYU_PROMOTE_CREDIT_SUMMARY') ? 1 : 0)) ||
                 !Configuration::updateValue('PAYU_PROMOTE_CREDIT_PRODUCT', (Tools::getValue('PAYU_PROMOTE_CREDIT_PRODUCT') ? 1 : 0)) ||
-                !Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_TWISTO', (Tools::getValue('PAYU_SEPARATE_PAY_LATER_TWISTO') ? 1 : 0)) ||
+                !Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_TWISTO_PL', (Tools::getValue('PAYU_SEPARATE_PAY_LATER_TWISTO_PL') ? 1 : 0)) ||
+                !Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_TWISTO_CZ', (Tools::getValue('PAYU_SEPARATE_PAY_LATER_TWISTO_CZ') ? 1 : 0)) ||
+                !Configuration::updateValue('PAYU_SEPARATE_PAY_LATER_PAYPO', (Tools::getValue('PAYU_SEPARATE_PAY_LATER_PAYPO') ? 1 : 0)) ||
                 !Configuration::updateValue('PAYU_STATUS_CONTROL', (Tools::getValue('PAYU_STATUS_CONTROL') ? 1 : 0))
             ) {
                 $errors[] = $this->l('Can not save configuration');
@@ -382,9 +387,45 @@ class PayU extends PaymentModule
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->l('Separate pay later Twisto'),
+                        'label' => $this->l('Separate pay later Twisto PL'),
+                        'desc' => $this->l('Shows separate Twisto PL payment method'),
+                        'name' => 'PAYU_SEPARATE_PAY_LATER_TWISTO_PL',
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Separate pay later Twisto CZ'),
+                        'desc' => $this->l('Shows separate Twisto CZ payment method'),
+                        'name' => 'PAYU_SEPARATE_PAY_LATER_TWISTO_CZ',
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Separate pay later Paypo'),
                         'desc' => $this->l('Shows separate Twisto payment method'),
-                        'name' => 'PAYU_SEPARATE_PAY_LATER_TWISTO',
+                        'name' => 'PAYU_SEPARATE_PAY_LATER_PAYPO',
                         'values' => array(
                             array(
                                 'id' => 'active_on',
@@ -644,7 +685,9 @@ class PayU extends PaymentModule
             'PAYU_PROMOTE_CREDIT_CART' => Configuration::get('PAYU_PROMOTE_CREDIT_CART'),
             'PAYU_PROMOTE_CREDIT_SUMMARY' => Configuration::get('PAYU_PROMOTE_CREDIT_SUMMARY'),
             'PAYU_PROMOTE_CREDIT_PRODUCT' => Configuration::get('PAYU_PROMOTE_CREDIT_PRODUCT'),
-            'PAYU_SEPARATE_PAY_LATER_TWISTO' => Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO'),
+            'PAYU_SEPARATE_PAY_LATER_TWISTO_PL' => Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO_PL'),
+             'PAYU_SEPARATE_PAY_LATER_TWISTO_CZ' => Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO_CZ'),
+              'PAYU_SEPARATE_PAY_LATER_PAYPO' => Configuration::get('PAYU_SEPARATE_PAY_LATER_PAYPO'),
             'PAYU_STATUS_CONTROL' => Configuration::get('PAYU_STATUS_CONTROL')
         );
 
@@ -696,11 +739,11 @@ class PayU extends PaymentModule
         if(Configuration::get('PAYU_PROMOTE_CREDIT') === '1') {
             if (version_compare(_PS_VERSION_, '1.7', 'lt')) {
                 $this->context->controller->addCSS('https://static.payu.com/res/v2/layout/style.css', 'all');
-                $this->context->controller->addJS('https://static.payu.com/res/v2/widget-products-installments.js', 'all');
+                $this->context->controller->addJS('https://static.payu.com/res/v2/widget-mini-installments.js', 'all');
             } else {
                 $this->context->controller->registerJavascript(
                     'remote-widget-products-installments',
-                    'https://static.payu.com/res/v2/widget-products-installments.js',
+                    'https://static.payu.com/res/v2/widget-mini-installments.js',
                     ['server' => 'remote', 'position' => 'bottom', 'priority' => 20]);
                 $this->context->controller->registerStylesheet(
                     'remote-installments-css-payu',
@@ -716,7 +759,7 @@ class PayU extends PaymentModule
         if ($this->hasRetryPayment($params['order']->id, $params['order']->current_state)) {
             $this->context->smarty->assign(
                 array(
-                    'payuImage' => $this->getPayuLogo('payu_logo_small.png'),
+                    'payuImage' => $this->getPayuLogo(),
                     'payuActionUrl' => $this->context->link->getModuleLink(
                         'payu', 'payment', array('id_order' => $params['order']->id, 'order_reference' => $params['order']->reference)
                     )
@@ -758,7 +801,7 @@ class PayU extends PaymentModule
             $cardPaymentOption->setCallToActionText($this->l('Pay by card'))
                 ->setAdditionalInformation('<span class="payu-marker-class"></span>')
                 ->setModuleName($this->name)
-                ->setLogo($this->getPayuLogo('payu_cards.png'))
+                ->setLogo($this->getPayuLogo('card-visa-mc.svg'))
                 ->setAction(
                     Configuration::get('PAYU_CARD_PAYMENT_WIDGET') === '1'
                         ? $this->context->link->getModuleLink($this->name, 'payment', ['payMethod' => 'card'])
@@ -773,7 +816,7 @@ class PayU extends PaymentModule
             $cardPaymentOption->setCallToActionText($this->l('Pay by BLIK'))
                 ->setAdditionalInformation('<span class="payu-marker-class"></span>')
                 ->setModuleName($this->name)
-                ->setLogo($this->getPayuLogo('payu_blik.png'))
+                ->setLogo($this->getPayuLogo('blik.svg'))
                 ->setAction($this->context->link->getModuleLink($this->name, 'payment', ['payuPay' => 1, 'payMethod' => 'blik', 'payuConditions' => true])
                 );
 
@@ -788,36 +831,62 @@ class PayU extends PaymentModule
 
         if (Configuration::get('PAYU_PROMOTE_CREDIT') !== '1' ||
             !($this->isCreditAvailable($totalPrice))) {
-            $paymentOption->setLogo($this->getPayuLogo('payu_logo_small.png'));
+            $paymentOption->setLogo($this->getPayuLogo());
         }
 
         array_push($paymentOptions, $paymentOption);
 
-        if ($this->isPayLaterTwistoAvailable()) {
-            $payLaterTwistoOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
-            $payLaterTwistoOption
+        if ($this->isPayLaterTwistoPlAvailable()) {
+            $payLaterTwistoPlOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
+            $payLaterTwistoPlOption
                 ->setCallToActionText($this->l('Pay later'))
                 ->setModuleName($this->name)
-                ->setLogo($this->getPayuLogo('payu_later_twisto_logo_small.png'))
+                ->setLogo($this->getPayuLogo('payu_later_twisto_pl_logo_small.png'))
                 ->setAdditionalInformation('<span class="payu-marker-class"></span>')
                 ->setAction($this->context->link->getModuleLink($this->name, 'payment',
                     array('payuPay' => 1, 'payMethod' => 'dpt', 'payuConditions' => true)));
-            array_push($paymentOptions, $payLaterTwistoOption);
+            array_push($paymentOptions, $payLaterTwistoPlOption);
+        }
+
+        if ($this->isPayLaterTwistoCzAvailable()) {
+            $payLaterTwistoCzOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
+            $payLaterTwistoCzOption
+                ->setCallToActionText($this->l('Pay later'))
+                ->setModuleName($this->name)
+                ->setLogo($this->getPayuLogo('payu_later_twisto_cz_logo_small.png'))
+                ->setAdditionalInformation('<span class="payu-marker-class"></span>')
+                ->setAction($this->context->link->getModuleLink($this->name, 'payment',
+                    array('payuPay' => 1, 'payMethod' => 'dpcz', 'payuConditions' => true)));
+            array_push($paymentOptions, $payLaterTwistoCzOption);
+        }
+
+        if ($this->isPayLaterPaypoAvailable()) {
+            $payLaterPaypoOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
+            $payLaterPaypoOption
+                ->setCallToActionText($this->l('Pay later'))
+                ->setModuleName($this->name)
+                ->setLogo($this->getPayuLogo('payu_later_paypo_logo_small.png'))
+                ->setAdditionalInformation('<span class="payu-marker-class"></span>')
+                ->setAction($this->context->link->getModuleLink($this->name, 'payment',
+                    array('payuPay' => 1, 'payMethod' => 'dpp', 'payuConditions' => true)));
+            array_push($paymentOptions, $payLaterPaypoOption);
         }
 
         if ($this->isCreditAvailable($totalPrice)) {
             $this->context->smarty->assign(array(
                 'total_price' => $totalPrice,
-                'payu_installment_img' => $this->getPayuLogo('payu_installment.png'),
-                'payu_logo_img' => $this->getPayuLogo('payu_logo_small.png'),
+                'payu_installment_img' => $this->getPayuLogo('payu_installment.svg'),
+                'payu_logo_img' => $this->getPayuLogo(),
                 'payu_question_mark_img' => $this->getPayuLogo('question_mark.png'),
+                'credit_pos' => OpenPayU_Configuration::getMerchantPosId(),
+                'credit_pos_key' => substr(OpenPayU_Configuration::getOauthClientSecret(), 0, 2)
             ));
 
             $installmentOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
             $installmentOption
                 ->setCallToActionText($this->l('Pay online in installments'))
                 ->setModuleName($this->name)
-                ->setLogo($this->getPayuLogo('payu_installment_small.png'))
+                ->setLogo($this->getPayuLogo('payu_installment.svg'))
                 ->setAdditionalInformation($this->fetchTemplate('checkout_installment.tpl'))
                 ->setAction($this->context->link->getModuleLink($this->name, 'payment',
                     array('payuPay' => 1, 'payMethod' => 'ai', 'payuConditions' => true)));
@@ -836,22 +905,33 @@ class PayU extends PaymentModule
         $this->context->smarty->assign(array(
                 'image' => $this->getPayuLogo(),
                 'creditImage' => $this->getPayuLogo('raty_small.png'),
-                'payu_logo_img' => $this->getPayuLogo('payu_logo_small.png'),
+                'payu_logo_img' => $this->getPayuLogo(),
                 'showCardPayment' => Configuration::get('PAYU_SEPARATE_CARD_PAYMENT') === '1' && $this->isCardAvailable(),
                 'showWidget' => Configuration::get('PAYU_CARD_PAYMENT_WIDGET') === '1',
-                'showBlik' => Configuration::get('PAYU_SEPARATE_BLIK_PAYMENT') === '1' && $this->isBlikAvailable(),
+                'showBlikPayment' => Configuration::get('PAYU_SEPARATE_BLIK_PAYMENT') === '1' && $this->isBlikAvailable(),
                 'actionUrl' => $this->context->link->getModuleLink('payu', 'payment'),
                 'cardActionUrl' => (Configuration::get('PAYU_CARD_PAYMENT_WIDGET') === '1'
                     ? $this->context->link->getModuleLink($this->name, 'payment', ['payMethod' => 'card'])
                     : $this->context->link->getModuleLink($this->name, 'payment', ['payuPay' => 1, 'payMethod' => 'c', 'payuConditions' => true])),
-                'creditActionUrl' => $this->context->link->getModuleLink('payu', 'payment', array(
+                'blikActionUrl' => $this->context->link->getModuleLink('payu', 'payment', [
+                    'payuPay' => 1, 'payMethod' => 'blik', 'payuConditions' => true
+                ]),
+                'creditActionUrl' => $this->context->link->getModuleLink('payu', 'payment', [
                     'payuPay' => 1, 'payMethod' => 'ai', 'payuConditions' => true
-                )),
-                'creditPayLaterTwistoActionUrl' => $this->context->link->getModuleLink('payu', 'payment', array(
+                ]),
+                'creditPayLaterTwistoPlActionUrl' => $this->context->link->getModuleLink('payu', 'payment', [
                     'payuPay' => 1, 'payMethod' => 'dpt', 'payuConditions' => true
-                )),
+                ]),
+                'creditPayLaterTwistoCzActionUrl' => $this->context->link->getModuleLink('payu', 'payment', [
+                    'payuPay' => 1, 'payMethod' => 'dpcz', 'payuConditions' => true
+                ]),
+                'creditPayLaterPayPoActionUrl' => $this->context->link->getModuleLink('payu', 'payment', [
+                    'payuPay' => 1, 'payMethod' => 'dpp', 'payuConditions' => true
+                ]),
                 'credit_available' => $this->isCreditAvailable($params['cart']->getOrderTotal()),
-                'payu_later_twisto_available' => $this->isPayLaterTwistoAvailable(),
+                'payu_later_twisto_pl_available' => Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO_PL') === '1' && $this->isPayLaterTwistoPlAvailable(),
+                'payu_later_twisto_cz_available' => Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO_CZ') === '1' && $this->isPayLaterTwistoCzAvailable(),
+                'payu_later_paypo_available' => Configuration::get('PAYU_SEPARATE_PAY_LATER_PAYPO') === '1' && $this->isPayLaterPaypoAvailable(),
                 'cart_total_amount' => $params['cart']->getOrderTotal())
         );
 
@@ -957,7 +1037,7 @@ class PayU extends PaymentModule
                 if ($updateOrderStatus === true) {
                     $output .= $this->displayConfirmation($this->l('Update status request has been sent'));
                 } else {
-                    $output .= $this->displayError($this->l('Update status request has not been completed correctly.' . ' ' . $updateOrderStatus['message']));
+                    $output .= $this->displayError($this->l('Update status request has not been completed correctly.') . ' ' . $updateOrderStatus['message']);
                 }
             }
 
@@ -1110,9 +1190,8 @@ class PayU extends PaymentModule
      * @return array
      * @throws Exception
      */
-    public function orderCreateRequestByOrder($payMethod = null, $parameters = [])
+    public function orderCreateRequestByOrder($orderTotal, $payMethod = null, $parameters = [])
     {
-
         SimplePayuLogger::addLog('order', __FUNCTION__, 'Entrance: ', $this->payu_order_id);
         $currency = Currency::getCurrency($this->order->id_currency);
 
@@ -1123,30 +1202,34 @@ class PayU extends PaymentModule
             throw new \Exception('OPU not properly configured for currency: ' . $currency['iso_code']);
         }
 
-        $ocreq = array(
+        $cart = new Cart($this->order->id_cart);
+        $customer = new Customer($cart->id_customer);
+        $continueUrl = Context::getContext()->link->getPageLink('order-confirmation&ext_order='.$this->extOrderId.'&id_cart='.$cart->id.'&id_module='.$this->id.'&id_order='.$this->order->id.'&key='.$customer->secure_key);
+
+        $ocreq = [
             'merchantPosId' => OpenPayU_Configuration::getMerchantPosId(),
-            'description' => $this->l('Order: ') . $this->order->id . ' - ' . $this->order->reference . ', ' . $this->l('Store: ') . Configuration::get('PS_SHOP_NAME'),
-            'products' => array(
-                array(
+            'description' => $this->l('Order: ') . $this->order->reference . ', ' . $this->l('Store: ') . Configuration::get('PS_SHOP_NAME'),
+            'products' => [
+                [
                     'quantity' => 1,
-                    'name' => $this->l('Order: ') . $this->order->id . ' - ' . $this->order->reference,
-                    'unitPrice' => $this->toAmount($this->order->total_paid)
-                )
-            ),
+                    'name' => $this->l('Order: ') . $this->order->reference,
+                    'unitPrice' => $this->toAmount($orderTotal)
+                ]
+            ],
             'customerIp' => $this->getIP(),
             'notifyUrl' => $this->context->link->getModuleLink('payu', 'notification'),
-            'continueUrl' => $this->context->link->getModuleLink('payu', 'success', array('id' => $this->extOrderId)),
+            'continueUrl' => $continueUrl,
             'currencyCode' => $currency['iso_code'],
-            'totalAmount' => $this->toAmount($this->order->total_paid),
+            'totalAmount' => $this->toAmount($orderTotal),
             'extOrderId' => $this->extOrderId
-        );
+        ];
 
 
         if ($this->getCustomer($this->order->id_customer)) {
             $ocreq['buyer'] = $this->getCustomer($this->order->id_customer);
         }
 
-        if ($payMethod === 'ai' || $payMethod === 'dp' || $payMethod === 'dpt' || $payMethod === 'dpp') {
+        if ($payMethod === 'ai' || $payMethod === 'dp' || $payMethod === 'dpt' || $payMethod === 'dpp' || $payMethod === 'dpcz') {
             $ocreq['credit'] = $this->getCreditSection();
         }
 
@@ -1174,10 +1257,10 @@ class PayU extends PaymentModule
             SimplePayuLogger::addLog('order', __FUNCTION__, print_r($result, true), $this->payu_order_id, 'OrderCreateResponse: ');
 
             if ($result->getStatus() === 'SUCCESS' || $result->getStatus() === 'WARNING_CONTINUE_3DS') {
-                return array(
-                    'redirectUri' => urldecode($result->getResponse()->redirectUri),
+                return [
+                    'redirectUri' => $result->getResponse()->redirectUri ? urldecode($result->getResponse()->redirectUri) : $continueUrl,
                     'orderId' => $result->getResponse()->orderId
-                );
+                ];
             } else {
                 SimplePayuLogger::addLog('order', __FUNCTION__, 'OpenPayU_Order::create($ocreq) NOT success!! ' . $this->displayName . ' ' . trim($result->getError() . ' ' . $result->getMessage(), $this->payu_order_id));
                 Logger::addLog($this->displayName . ' ' . trim($result->getError() . ' ' . $result->getMessage()), 1);
@@ -1190,18 +1273,16 @@ class PayU extends PaymentModule
 
             throw new \Exception($e->getCode() . ' ' . $e->getMessage());
         }
-
     }
 
     public function updateOrderData($responseNotification = null)
     {
-        SimplePayuLogger::addLog('notification', __FUNCTION__, 'Entrance: ', $this->payu_order_id);
+        SimplePayuLogger::addLog('order', __FUNCTION__, 'Entrance', $this->payu_order_id);
 
         if (empty($this->payu_order_id)) {
             Logger::addLog($this->displayName . ' ' . 'Can not get order information - id_session is empty', 1);
         }
 
-        $result = null;
         $this->configureOpuByIdOrder($this->id_order);
 
         if ($responseNotification) {
@@ -1211,29 +1292,21 @@ class PayU extends PaymentModule
             $response = $raw->getResponse();
         }
 
-        SimplePayuLogger::addLog('order', __FUNCTION__, print_r($result, true), $this->payu_order_id, 'OrderRetrieve response object: ');
+        SimplePayuLogger::addLog('order', __FUNCTION__, print_r($response, true), $this->payu_order_id, 'OrderRetrieve response object: ');
         $payu_order = $responseNotification ? $response->order : $response->orders[0];
         $payu_properties = isset($response->properties) ? $response->properties : null;
 
         if ($payu_order) {
-
             $this->order = new Order($this->id_order);
             SimplePayuLogger::addLog('notification', __FUNCTION__, 'Order exists in PayU system ', $this->payu_order_id);
-            $this->updateOrderState($payu_order, $payu_properties);
+
+            $linkedOrders = [];
+            foreach ($this->order->getBrother() as $linkedOrder) {
+                $linkedOrders[] = $linkedOrder->id;
+            }
+
+            $this->updateOrderState($payu_order, $payu_properties, $linkedOrders);
         }
-    }
-
-    public function addMsgToOrder($message, $prestaOrderId)
-    {
-        SimplePayuLogger::addLog('notification', __FUNCTION__, 'Addition of PAYMENT_ID info', $this->payu_order_id);
-
-        $msg = new Message();
-        $message = strip_tags($message, '<br>');
-        $msg->message = $message;
-        $msg->id_order = intval($prestaOrderId);
-        $msg->private = 1;
-        $msg->add();
-
     }
 
     /**
@@ -1244,10 +1317,8 @@ class PayU extends PaymentModule
         switch ($this->getLanguage()) {
             case 'pl':
                 return self::CONDITION_PL;
-                break;
             case 'cs':
                 return self::CONDITION_CS;
-                break;
             default:
                 return self::CONDITION_EN;
         }
@@ -1282,7 +1353,7 @@ class PayU extends PaymentModule
         }
     }
 
-    public function getPayuLogo($file = 'payu_logo.png')
+    public function getPayuLogo($file = 'logo-payu.svg')
     {
         return Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/img/' . $file);
     }
@@ -1474,6 +1545,7 @@ class PayU extends PaymentModule
             return null;
         }
 
+
         return array(
             'email' => $customer->email,
             'firstName' => $customer->firstname,
@@ -1549,7 +1621,7 @@ class PayU extends PaymentModule
      * @param object $payu_order
      * @return bool
      */
-    private function updateOrderState($payu_order, $payu_properties)
+    private function updateOrderState($payu_order, $payu_properties, $linkedOrders)
     {
         $status = isset($payu_order->status) ? $payu_order->status : null;
 
@@ -1568,27 +1640,26 @@ class PayU extends PaymentModule
             $withoutUpdateOrderState = !$this->isCorrectPreviousStatus($order_state_id)
                 || $this->hasLastPayuOrderIsCompleted($this->order->id);
 
+            $ordersToChange = array_merge($linkedOrders, [$this->order->id]);
+
             switch ($status) {
                 case OpenPayuOrderStatus::STATUS_COMPLETED:
                     if (!$withoutUpdateOrderState && $order_state_id != (int)Configuration::get('PAYU_PAYMENT_STATUS_COMPLETED')) {
-                        $history->changeIdOrderState(Configuration::get('PAYU_PAYMENT_STATUS_COMPLETED'), $this->order->id);
-                        $history->addWithemail(true);
+                        $this->setOrdersStatus($ordersToChange, Configuration::get('PAYU_PAYMENT_STATUS_COMPLETED'));
                         $this->addTransactionIdToPayment($this->order, $this->getTransactionId($payu_properties));
                     }
                     $this->updateOrderPaymentStatusBySessionId($status);
                     break;
                 case OpenPayuOrderStatus::STATUS_CANCELED:
                     if (!$withoutUpdateOrderState && $order_state_id != (int)Configuration::get('PAYU_PAYMENT_STATUS_CANCELED')) {
-                        $history->changeIdOrderState(Configuration::get('PAYU_PAYMENT_STATUS_CANCELED'), $this->order->id);
-                        $history->addWithemail(true);
+                        $this->setOrdersStatus($ordersToChange, Configuration::get('PAYU_PAYMENT_STATUS_CANCELED'));
                     }
                     $this->updateOrderPaymentStatusBySessionId($status);
                     break;
                 case OpenPayuOrderStatus::STATUS_WAITING_FOR_CONFIRMATION:
                 case OpenPayuOrderStatus::STATUS_REJECTED:
                     if (!$withoutUpdateOrderState && $order_state_id != (int)Configuration::get('PAYU_PAYMENT_STATUS_SENT')) {
-                        $history->changeIdOrderState(Configuration::get('PAYU_PAYMENT_STATUS_SENT'), $this->order->id);
-                        $history->addWithemail(true);
+                        $this->setOrdersStatus($ordersToChange, Configuration::get('PAYU_PAYMENT_STATUS_SENT'));
                     }
                     $this->updateOrderPaymentStatusBySessionId($status);
                     break;
@@ -1599,6 +1670,16 @@ class PayU extends PaymentModule
         }
 
         return false;
+    }
+
+    private function setOrdersStatus($ordersToChange, $status)
+    {
+        foreach ($ordersToChange as $id) {
+            $history = new OrderHistory();
+            $history->id_order = $id;
+            $history->changeIdOrderState($status, $id);
+            $history->addWithemail(true);
+        }
     }
 
     /**
@@ -1723,12 +1804,47 @@ class PayU extends PaymentModule
         return $registerStatus;
     }
 
+    public function hookPaymentReturn($params)
+    {
+        if (!$this->active) {
+            return '';
+        }
+
+        $extOrder = Tools::getValue('ext_order');
+
+        if ($extOrder) {
+            $order_payment = $this->getOrderPaymentByExtOrderId($extOrder);
+
+            if (isset($params['order'])) {
+                $order = $params['order'];
+            } elseif (isset($params['objOrder'])) {
+                $order = $params['objOrder'];
+            } else {
+                return '';
+            }
+
+            if ($order->id === (int)$order_payment['id_order'] && $order_payment['status'] !== OpenPayuOrderStatus::STATUS_COMPLETED) {
+                $this->id_order = $order->id;
+                $this->payu_order_id = $order_payment['id_session'];
+                $this->updateOrderData();
+            }
+        }
+
+        $this->context->smarty->assign(array(
+            'payuLogo' => $this->getPayuLogo()
+        ));
+
+        return $this->fetchTemplate('/views/templates/hook/paymentReturn.tpl');
+    }
+
     public function hookDisplayCheckoutSubtotalDetails($params)
     {
         if ($this->isCreditAvailable($params['cart']->getOrderTotal())
             && Configuration::get('PAYU_PROMOTE_CREDIT_CART') === '1') {
             $this->context->smarty->assign(array(
-                'cart_total_amount' => $params['cart']->getOrderTotal()
+                'cart_total_amount' => $params['cart']->getOrderTotal(),
+                'credit_pos' => OpenPayU_Configuration::getMerchantPosId(),
+                'credit_pos_key' => substr(OpenPayU_Configuration::getOauthClientSecret(), 0, 2)
             ));
             return $this->display(__FILE__, 'cart-detailed-totals.tpl');
         }
@@ -1739,7 +1855,9 @@ class PayU extends PaymentModule
         if (Configuration::get('PAYU_PROMOTE_CREDIT_SUMMARY') === '1' &&
             $this->isCreditAvailable($params['cart']->getOrderTotal())) {
             $this->context->smarty->assign(array(
-                'cart_total_amount' => $params['cart']->getOrderTotal()
+                'cart_total_amount' => $params['cart']->getOrderTotal(),
+                'credit_pos' => OpenPayU_Configuration::getMerchantPosId(),
+                'credit_pos_key' => substr(OpenPayU_Configuration::getOauthClientSecret(), 0, 2)
             ));
             return $this->display(__FILE__, 'cart-summary.tpl');
         }
@@ -1782,7 +1900,9 @@ class PayU extends PaymentModule
                 if($creditAvailable){
                     $this->context->smarty->assign(array(
                         'product_price' => $price,
-                        'product_id' => $productId
+                        'product_id' => $productId,
+                        'credit_pos' => OpenPayU_Configuration::getMerchantPosId(),
+                        'credit_pos_key' => substr(OpenPayU_Configuration::getOauthClientSecret(), 0, 2)
                     ));
                     return $this->display(__FILE__, 'product.tpl');
                 } else {
@@ -1800,7 +1920,9 @@ class PayU extends PaymentModule
                     ($params['type'] === 'after_price' && $current_controller === 'product'))) {
                 $this->context->smarty->assign(array(
                     'product_price' => $product['price_amount'],
-                    'product_id' => $product['id_product']
+                    'product_id' => $product['id_product'],
+                    'credit_pos' => OpenPayU_Configuration::getMerchantPosId(),
+                    'credit_pos_key' => substr(OpenPayU_Configuration::getOauthClientSecret(), 0, 2)
                 ));
                 return $this->display(__FILE__, 'product.tpl', $this->getCacheId($product['price_amount'].$product['id_product']));
             } else {
@@ -1891,31 +2013,27 @@ class PayU extends PaymentModule
         $this->configureOpuByIdOrder($id_order);
 
         try {
-
             $refund = OpenPayU_Refund::create(
                 $ref_no,
                 'PayU Refund',
                 round($value * 100)
             );
 
-            if ($refund->getStatus() == 'SUCCESS')
-                return array(true);
-            else {
+            if ($refund->getStatus() === 'SUCCESS') {
+                return [true];
+            } else {
                 Logger::addLog($this->displayName . ' Order Refund error: ', 1);
-                return array(false, 'Status code: ' . $refund->getStatus());
+                return [false, 'Status code: ' . $refund->getStatus()];
             }
 
         } catch (OpenPayU_Exception_Request $e) {
             $response = $e->getOriginalResponse()->getResponse()->status;
             Logger::addLog($this->displayName . ' Order Refund error: ' . $response->codeLiteral .' ['.$response->code.']', 1);
-            return array(false, $response->codeLiteral .' ['.$response->code.'] - <a target="_blank" href="http://developers.payu.com/pl/restapi.html#refunds">developers.payu.com</a>');
+            return [false, $response->codeLiteral .' ['.$response->code.'] - <a target="_blank" href="http://developers.payu.com/pl/restapi.html#refunds">developers.payu.com</a>'];
         } catch (OpenPayU_Exception $e) {
             Logger::addLog($this->displayName . ' Order Refund error: ' . $e->getMessage(), 1);
-            return array(false, $e->getMessage());
+            return [false, $e->getMessage()];
         }
-
-        return false;
-
     }
 
     private function checkCurrency($cart)
@@ -2002,11 +2120,39 @@ class PayU extends PaymentModule
      * @param $amount
      * @return bool
      */
-    private function isPayLaterTwistoAvailable()
+    private function isPayLaterTwistoPlAvailable()
     {
-        return (Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO') === '1'
-                || Configuration::get('PAYU_PROMOTE_CREDIT') === '1')
-            && PayMethodsCache::isDelayedPaymentTwistoAvailable(
+        return (Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO_PL') === '1'
+                && Configuration::get('PAYU_PROMOTE_CREDIT') === '1')
+            && PayMethodsCache::isDelayedPaymentTwistoPlAvailable(
+                Currency::getCurrency($this->context->cart->id_currency),
+                $this->getVersion());
+    }
+
+
+    /**
+     * @param $amount
+     * @return bool
+     */
+    private function isPayLaterTwistoCzAvailable()
+    {
+        return (Configuration::get('PAYU_SEPARATE_PAY_LATER_TWISTO_CZ') === '1'
+                && Configuration::get('PAYU_PROMOTE_CREDIT') === '1')
+            && PayMethodsCache::isDelayedPaymentTwistoCzAvailable(
+                Currency::getCurrency($this->context->cart->id_currency),
+                $this->getVersion());
+    }
+
+
+    /**
+     * @param $amount
+     * @return bool
+     */
+    private function isPayLaterPaypoAvailable()
+    {
+        return (Configuration::get('PAYU_SEPARATE_PAY_LATER_PAYPO') === '1'
+                && Configuration::get('PAYU_PROMOTE_CREDIT') === '1')
+            && PayMethodsCache::isDelayedPaymentPaypoAvailable(
                 Currency::getCurrency($this->context->cart->id_currency),
                 $this->getVersion());
     }

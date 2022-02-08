@@ -148,10 +148,12 @@ class PayUPaymentModuleFrontController extends ModuleFrontController
 
     private function pay($payMethod = null, $parameters = [])
     {
+        $orderTotal = $this->context->cart->getOrderTotal(true, Cart::BOTH);
+
         if (!$this->hasRetryPayment) {
             $this->payu->validateOrder(
                 $this->context->cart->id, (int)Configuration::get('PAYU_PAYMENT_STATUS_PENDING'),
-                $this->context->cart->getOrderTotal(true, Cart::BOTH), $this->payu->displayName,
+                $orderTotal, $this->payu->displayName,
                 null, array(), (int)$this->context->cart->id_currency, false, $this->context->cart->secure_key,
                 Context::getContext()->shop->id ? new Shop((int)Context::getContext()->shop->id) : null
             );
@@ -163,16 +165,14 @@ class PayUPaymentModuleFrontController extends ModuleFrontController
         $this->payu->order = $this->order;
 
         try {
-            $result = $this->payu->orderCreateRequestByOrder($payMethod, $parameters);
+            $result = $this->payu->orderCreateRequestByOrder($orderTotal, $payMethod, $parameters);
 
             $this->payu->payu_order_id = $result['orderId'];
             $this->postOCR();
 
-            $redirectUrl = $result['redirectUri'] ? $result['redirectUri'] : $this->context->link->getModuleLink('payu', 'success', array('id' => $this->payu->getExtOrderId()));
+            SimplePayuLogger::addLog('order', __FUNCTION__, 'Process redirect to ' . $result['redirectUri'], $result['orderId']);
 
-            SimplePayuLogger::addLog('order', __FUNCTION__, 'Process redirect to ' . $redirectUrl, $result['orderId']);
-
-            Tools::redirect($redirectUrl);
+            Tools::redirect($result['redirectUri']);
 
         } catch (\Exception $e) {
             SimplePayuLogger::addLog('order', __FUNCTION__, 'An error occurred while processing  OCR - ' . $e->getMessage(), '');

@@ -13,9 +13,23 @@ class PayMethodsCache
     const PAYU_PAY_METHODS_CACHE_CONFIG_PREFIX = 'PAYU_PAY_METHODS_';
 
 
-    public static function isDelayedPaymentTwistoAvailable($currency, $version)
+    public static function isDelayedPaymentTwistoPlAvailable($currency, $version)
     {
         return self::isPaytypeAvailable('dpt', $currency, $version);
+
+    }
+
+
+    public static function isDelayedPaymentTwistoCzAvailable($currency, $version)
+    {
+        return self::isPaytypeAvailable('dpcz', $currency, $version);
+
+    }
+
+
+    public static function isDelayedPaymentPaypoAvailable($currency, $version)
+    {
+        return self::isPaytypeAvailable('dpp', $currency, $version);
 
     }
 
