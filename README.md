@@ -225,3 +225,4 @@ Widget z kalkulacją ratalną wygląda następująco:
 [img4]: readme_images/ponow_platnosc.png
 [img5]: readme_images/widget.png
 [img6]: readme_images/separate_card.png
+
